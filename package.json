@@ -1,5 +1,5 @@
 {
-  "name": "ImgProc",
+  "name": "img_proc",
   "version": "0.0.1",
   "private": true,
   "description": "ImgProc - a PWA to apply image processing with webGL",
