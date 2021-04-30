@@ -13,3 +13,4 @@
 - host PWA with firebase
 - save filters in BE / local storage (express/firebase)
 - slider debounce
+- test/fix usability on mobile

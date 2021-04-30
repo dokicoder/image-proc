@@ -15,11 +15,12 @@ void main() {
 
 const fragmentShader = `
 uniform float blend;
+uniform sampler2D imageTexture;
 
 varying vec2 _uv;
 
 void main () {
-    gl_FragColor = vec4 (_uv * blend, 0., 1.);
+  gl_FragColor = texture2D(imageTexture, _uv) * blend;
 }`;
 
 let mount: HTMLDivElement = undefined;
@@ -29,6 +30,10 @@ let renderer: WebGLRenderer | undefined = undefined;
 
 const uniforms = {
   blend: { value: 0 },
+  imageTexture: {
+    type: 't',
+    value: 0,
+  },
 };
 
 const material = new THREE.ShaderMaterial({
@@ -45,6 +50,12 @@ const v2 = [1.0, 1.0, 1.0];
 const uv2 = [1.0, 1.0];
 const v3 = [-1.0, 1.0, 1.0];
 const uv3 = [0.0, 1.0];
+
+async function loadTexture() {
+  return new THREE.TextureLoader().loadAsync(
+    'https://images.unsplash.com/photo-1619665760845-d009188ef271?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=934&q=80'
+  );
+}
 
 const Plane = () => {
   const vertices = new Float32Array([v0, v1, v2, v2, v3, v0].flat());
@@ -73,7 +84,7 @@ export const WebGlTexture: React.FC = () => {
     camera = new THREE.PerspectiveCamera(75, uniforms.blend.value, 0.1, 1000);
 
     // add renderer
-    renderer = new WebGLRenderer({ antialias: true });
+    renderer = new WebGLRenderer();
     // identifiable clear color for debugging
     renderer.setClearColor('#880400');
     renderer.setSize(width, height);
@@ -84,6 +95,14 @@ export const WebGlTexture: React.FC = () => {
     return () => {
       mount.removeChild(renderer.domElement);
     };
+  }, []);
+
+  useEffect(() => {
+    loadTexture().then(texture => {
+      (material.uniforms as any).imageTexture.value = texture;
+
+      renderScene();
+    });
   }, []);
 
   useEffect(() => {
@@ -99,7 +118,7 @@ export const WebGlTexture: React.FC = () => {
       <div style={{ width: '500px', height: '800px' }} ref={m => (mount = m)} />
       {/* TODO: debounce */}
       <div>
-        <Slider value={blendState} update={value => updateBlend(value)} label="Some shader value" />
+        <Slider value={blendState} update={value => updateBlend(value)} label="Shader blend value example" />
       </div>
     </>
   );
