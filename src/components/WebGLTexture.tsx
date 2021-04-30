@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import * as THREE from 'three';
 import { Scene, WebGLRenderer, Camera } from 'three';
 import { Slider } from './Slider';
@@ -74,10 +74,9 @@ export const WebGlTexture: React.FC = () => {
   };
 
   const [blendState, updateBlend] = useState(0.5);
+  const [texture, setTexture] = useState<THREE.Texture>();
 
   useEffect(() => {
-    const { clientWidth: width, clientHeight: height } = mount;
-
     // add scene
     scene = new Scene();
 
@@ -87,7 +86,6 @@ export const WebGlTexture: React.FC = () => {
     renderer = new WebGLRenderer();
     // identifiable clear color for debugging
     renderer.setClearColor('#880400');
-    renderer.setSize(width, height);
     mount.appendChild(renderer.domElement);
 
     scene.add(Plane());
@@ -98,12 +96,23 @@ export const WebGlTexture: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadTexture().then(texture => {
+    loadTexture().then(loadedTexture => setTexture(loadedTexture));
+  }, []);
+
+  useEffect(() => {
+    if (texture) {
       (material.uniforms as any).imageTexture.value = texture;
 
+      // calculate aspect and scale texture to container size
+      // TODO: this only works if the container has no other contents. it also breaks when changing zoom level (we need to trigger a rerender with native handlers then)
+      const aspectWidth = Math.round(aspect * (mount?.clientHeight ?? 0));
+      const aspectHeight = Math.round((aspect && mount?.clientHeight) || 0);
+
+      renderer.setSize(aspectWidth, aspectHeight);
+
       renderScene();
-    });
-  }, []);
+    }
+  }, [texture]);
 
   useEffect(() => {
     console.log('rerender WebGL');
@@ -113,13 +122,16 @@ export const WebGlTexture: React.FC = () => {
     renderScene();
   }, [blendState]);
 
+  const aspect = useMemo(() => {
+    return texture?.image.width && texture?.image.height ? texture?.image.width / texture?.image.height : 0;
+  }, [texture]);
+
   return (
-    <>
-      <div style={{ width: '500px', height: '800px' }} ref={m => (mount = m)} />
+    <div className="image-after" ref={m => (mount = m)}>
+      <div />
       {/* TODO: debounce */}
-      <div>
-        <Slider value={blendState} update={value => updateBlend(value)} label="Shader blend value example" />
-      </div>
-    </>
+
+      {false && <Slider value={blendState} update={value => updateBlend(value)} label="Shader blend value example" />}
+    </div>
   );
 };
