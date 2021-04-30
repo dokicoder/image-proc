@@ -1,7 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import * as THREE from 'three';
-import { Scene, WebGLRenderer, Camera } from 'three';
-import { Slider } from './Slider';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import {
+  Scene,
+  WebGLRenderer,
+  Material,
+  ShaderMaterial,
+  PerspectiveCamera,
+  Mesh,
+  BufferGeometry,
+  BufferAttribute,
+  Texture,
+  TextureLoader,
+} from 'three';
 
 const vertexShader = `
 varying vec2 _uv;
@@ -23,25 +32,6 @@ void main () {
   gl_FragColor = texture2D(imageTexture, _uv) * blend;
 }`;
 
-let mount: HTMLDivElement = undefined;
-let camera: Camera = undefined;
-let scene: THREE.Scene = undefined;
-let renderer: WebGLRenderer | undefined = undefined;
-
-const uniforms = {
-  blend: { value: 0 },
-  imageTexture: {
-    type: 't',
-    value: 0,
-  },
-};
-
-const material = new THREE.ShaderMaterial({
-  uniforms,
-  fragmentShader,
-  vertexShader,
-});
-
 const v0 = [-1.0, -1.0, 1.0];
 const uv0 = [0.0, 0.0];
 const v1 = [1.0, -1.0, 1.0];
@@ -52,86 +42,131 @@ const v3 = [-1.0, 1.0, 1.0];
 const uv3 = [0.0, 1.0];
 
 async function loadTexture() {
-  return new THREE.TextureLoader().loadAsync(
+  return new TextureLoader().loadAsync(
     'https://images.unsplash.com/photo-1619665760845-d009188ef271?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=934&q=80'
   );
 }
 
-const Plane = () => {
+const Plane = (material: Material) => {
   const vertices = new Float32Array([v0, v1, v2, v2, v3, v0].flat());
   const uvs = new Float32Array([uv0, uv1, uv2, uv2, uv3, uv0].flat());
 
-  const geometry = new THREE.BufferGeometry()
-    .setAttribute('position', new THREE.BufferAttribute(vertices, 3))
-    .setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+  const geometry = new BufferGeometry()
+    .setAttribute('position', new BufferAttribute(vertices, 3))
+    .setAttribute('uv', new BufferAttribute(uvs, 2));
 
-  return new THREE.Mesh(geometry, material);
+  return new Mesh(geometry, material);
 };
 
-export const WebGlTexture: React.FC = () => {
-  const renderScene = () => {
-    renderer?.render(scene, camera);
-  };
+interface IProps {
+  fragmentShader: string;
+  vertexShader: string;
+  // TODO: strong type
+  uniforms: any;
+  texture: Texture;
+}
 
-  const [blendState, updateBlend] = useState(0.5);
-  const [texture, setTexture] = useState<THREE.Texture>();
+export const WebGlTexture: React.FC<IProps> = ({ fragmentShader, vertexShader, texture, uniforms }) => {
+  const renderSceneRef = useRef<() => void>(null);
+  const rendererRef = useRef<WebGLRenderer>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const materialRef = useRef<ShaderMaterial>(null);
+
+  useEffect(
+    () => {
+      // add scene
+      const scene = new Scene();
+      const camera = new PerspectiveCamera(75, 1, 0.1, 1000);
+
+      // add renderer
+      const renderer = new WebGLRenderer();
+      // identifiable clear color for debugging
+      renderer.setClearColor('#880400');
+      imageRef.current.appendChild(renderer.domElement);
+
+      const material = new ShaderMaterial({
+        uniforms,
+        fragmentShader,
+        vertexShader,
+      });
+
+      scene.add(Plane(material));
+
+      materialRef.current = material;
+      rendererRef.current = renderer;
+      renderSceneRef.current = () => {
+        console.log('rerender WebGL');
+
+        renderer.render(scene, camera);
+      };
+
+      return () => {
+        imageRef.current.removeChild(renderer.domElement);
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   useEffect(() => {
-    // add scene
-    scene = new Scene();
+    if (texture) {
+      if (!materialRef.current.uniforms.imageTexture) {
+        materialRef.current.uniforms.imageTexture = {
+          type: 't',
+          value: null,
+        } as any;
+      }
 
-    camera = new THREE.PerspectiveCamera(75, uniforms.blend.value, 0.1, 1000);
+      materialRef.current.uniforms.imageTexture.value = texture;
 
-    // add renderer
-    renderer = new WebGLRenderer();
-    // identifiable clear color for debugging
-    renderer.setClearColor('#880400');
-    mount.appendChild(renderer.domElement);
+      rendererRef.current.setSize(texture.image.width, texture.image.height);
+      renderSceneRef.current();
+    }
+  }, [texture]);
 
-    scene.add(Plane());
+  useEffect(() => {
+    if (vertexShader && fragmentShader) {
+      materialRef.current.setValues({
+        uniforms: {
+          ...uniforms,
+          imageTexture: {
+            type: 't',
+            value: texture,
+          },
+        },
+        fragmentShader,
+        vertexShader,
+      });
+    }
 
-    return () => {
-      mount.removeChild(renderer.domElement);
-    };
-  }, []);
+    renderSceneRef.current();
+  }, [vertexShader, fragmentShader, uniforms]);
+
+  const aspect = useMemo(() => {
+    if (!texture.image) return 0;
+
+    const { width, height } = texture.image;
+
+    return width / height;
+  }, [texture]);
+
+  console.log(aspect);
+
+  return <div className="image-after" ref={imageRef} />;
+};
+
+export const WebGlTextureDefault: React.FC = () => {
+  const [texture, setTexture] = useState<Texture>();
+
+  const uniforms = {
+    blend: { value: 1.0 },
+  };
 
   useEffect(() => {
     loadTexture().then(loadedTexture => setTexture(loadedTexture));
   }, []);
 
-  useEffect(() => {
-    if (texture) {
-      (material.uniforms as any).imageTexture.value = texture;
-
-      // calculate aspect and scale texture to container size
-      // TODO: this only works if the container has no other contents. it also breaks when changing zoom level (we need to trigger a rerender with native handlers then)
-      const aspectWidth = Math.round(aspect * (mount?.clientHeight ?? 0));
-      const aspectHeight = Math.round((aspect && mount?.clientHeight) || 0);
-
-      renderer.setSize(aspectWidth, aspectHeight);
-
-      renderScene();
-    }
-  }, [texture]);
-
-  useEffect(() => {
-    console.log('rerender WebGL');
-
-    (material.uniforms as any).blend.value = blendState;
-
-    renderScene();
-  }, [blendState]);
-
-  const aspect = useMemo(() => {
-    return texture?.image.width && texture?.image.height ? texture?.image.width / texture?.image.height : 0;
-  }, [texture]);
-
-  return (
-    <div className="image-after" ref={m => (mount = m)}>
-      <div />
-      {/* TODO: debounce */}
-
-      {false && <Slider value={blendState} update={value => updateBlend(value)} label="Shader blend value example" />}
-    </div>
-  );
+  return texture ? (
+    <WebGlTexture texture={texture} uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} />
+  ) : null;
 };
