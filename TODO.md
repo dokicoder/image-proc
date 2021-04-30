@@ -12,4 +12,4 @@
 - allow creation of multiple filters
 - host PWA with firebase
 - save filters in BE / local storage (express/firebase)
-- add a random unsplash image as example
+- slider debounce

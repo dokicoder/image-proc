@@ -5,8 +5,10 @@
   "description": "ImgProc - a PWA to apply image processing with webGL",
   "main": "index.js",
   "dependencies": {
+    "@types/three": "^0.127.1",
     "@typescript-eslint/eslint-plugin": "^3.6.1",
     "@typescript-eslint/parser": "^3.6.1",
+    "@types/uuid": "^8.3.0",
     "eslint": "^7.22.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
@@ -21,7 +23,9 @@
     "react-router-dom": "^5.2.0",
     "slate": "^0.59.0",
     "slate-history": "^0.59.0",
-    "slate-react": "^0.59.0"
+    "slate-react": "^0.59.0",
+    "three": "0.128.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/react": "17.0.3",
