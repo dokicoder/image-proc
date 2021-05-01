@@ -159,7 +159,7 @@ export const WebGlTextureDefault: React.FC = () => {
   const [texture, setTexture] = useState<Texture>();
 
   const uniforms = {
-    blend: { value: 1.0 },
+    blend: { value: 0.5 },
   };
 
   useEffect(() => {
