@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { WebGlTextureDefault } from './WebGLTexture';
 
 interface IProps {
-  src: string;
+  before: React.ReactNode;
+  after: React.ReactNode;
 }
 
 const Divider: React.FC<{ position: number; onDrag: React.DragEventHandler<HTMLDivElement> }> = ({
@@ -17,8 +17,8 @@ const Divider: React.FC<{ position: number; onDrag: React.DragEventHandler<HTMLD
   );
 };
 
-export const BeforeAfterImageWithSlider: React.FC<IProps> = ({ src }) => {
-  const [position, setPosition] = useState(0.85);
+export const BeforeAfterImageWithSlider: React.FC<IProps> = ({ before, after }) => {
+  const [position, setPosition] = useState(0.5);
 
   const imageContainerRef = useRef(null);
 
@@ -33,10 +33,10 @@ export const BeforeAfterImageWithSlider: React.FC<IProps> = ({ src }) => {
 
   return (
     <div className="image-container" ref={imageContainerRef}>
-      <WebGlTextureDefault />
+      {after}
       <div className="image-before">
         <div className="mask-container" style={{ maxWidth: `${position * 100}%` }}>
-          <img src={src} />
+          {before}
         </div>
         <Divider position={position} onDrag={onDragKnob} />
       </div>

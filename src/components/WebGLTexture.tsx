@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react';
 import {
   Scene,
   WebGLRenderer,
   Material,
   ShaderMaterial,
-  PerspectiveCamera,
+  Camera,
   Mesh,
   BufferGeometry,
   BufferAttribute,
@@ -64,22 +64,31 @@ interface IProps {
   // TODO: strong type
   uniforms: any;
   texture: Texture;
+  renderer: WebGLRenderer;
+  scene: Scene;
+  camera: Camera;
 }
 
-export const WebGlTexture: React.FC<IProps> = ({ fragmentShader, vertexShader, texture, uniforms }) => {
-  const renderSceneRef = useRef<() => void>(null);
-  const rendererRef = useRef<WebGLRenderer>(null);
+export const WebGlTexture: React.FC<IProps> = ({
+  fragmentShader,
+  vertexShader,
+  texture,
+  uniforms,
+  renderer,
+  scene,
+  camera,
+}) => {
   const imageRef = useRef<HTMLDivElement>(null);
   const materialRef = useRef<ShaderMaterial>(null);
 
+  const renderScene = useCallback(() => {
+    console.log('rerender WebGL');
+
+    renderer.render(scene, camera);
+  }, [renderer, scene, camera]);
+
   useEffect(
     () => {
-      // add scene
-      const scene = new Scene();
-      const camera = new PerspectiveCamera(75, 1, 0.1, 1000);
-
-      // add renderer
-      const renderer = new WebGLRenderer();
       // identifiable clear color for debugging
       renderer.setClearColor('#880400');
       imageRef.current.appendChild(renderer.domElement);
@@ -90,22 +99,17 @@ export const WebGlTexture: React.FC<IProps> = ({ fragmentShader, vertexShader, t
         vertexShader,
       });
 
+      scene.clear();
       scene.add(Plane(material));
 
       materialRef.current = material;
-      rendererRef.current = renderer;
-      renderSceneRef.current = () => {
-        console.log('rerender WebGL');
-
-        renderer.render(scene, camera);
-      };
 
       return () => {
         imageRef.current.removeChild(renderer.domElement);
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [renderer]
   );
 
   useEffect(() => {
@@ -119,10 +123,10 @@ export const WebGlTexture: React.FC<IProps> = ({ fragmentShader, vertexShader, t
 
       materialRef.current.uniforms.imageTexture.value = texture;
 
-      rendererRef.current.setSize(texture.image.width, texture.image.height);
-      renderSceneRef.current();
+      renderer.setSize(texture.image.width, texture.image.height);
+      renderScene();
     }
-  }, [texture]);
+  }, [texture, renderer, renderScene]);
 
   useEffect(() => {
     if (vertexShader && fragmentShader) {
@@ -139,7 +143,7 @@ export const WebGlTexture: React.FC<IProps> = ({ fragmentShader, vertexShader, t
       });
     }
 
-    renderSceneRef.current();
+    renderScene();
   }, [vertexShader, fragmentShader, uniforms]);
 
   const aspect = useMemo(() => {
@@ -150,12 +154,16 @@ export const WebGlTexture: React.FC<IProps> = ({ fragmentShader, vertexShader, t
     return width / height;
   }, [texture]);
 
-  console.log(aspect);
+  console.log({ aspect });
 
   return <div className="image-after" ref={imageRef} />;
 };
 
-export const WebGlTextureDefault: React.FC = () => {
+export const WebGlTextureDefault: React.FC<{ renderer: WebGLRenderer; scene: Scene; camera: Camera }> = ({
+  renderer,
+  scene,
+  camera,
+}) => {
   const [texture, setTexture] = useState<Texture>();
 
   const uniforms = {
@@ -167,6 +175,14 @@ export const WebGlTextureDefault: React.FC = () => {
   }, []);
 
   return texture ? (
-    <WebGlTexture texture={texture} uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} />
+    <WebGlTexture
+      renderer={renderer}
+      scene={scene}
+      camera={camera}
+      texture={texture}
+      uniforms={uniforms}
+      vertexShader={vertexShader}
+      fragmentShader={fragmentShader}
+    />
   ) : null;
 };
