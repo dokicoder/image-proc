@@ -2,6 +2,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: Helvetica, Arial, sans-serif;
 }
 #main {
     display: flex;
@@ -32,6 +33,10 @@
 .slider {
     display: flex;
     flex-direction: column;
+
+    input {
+        cursor: grabbing;
+    }
 }
 
 .divider {
@@ -39,6 +44,7 @@
     height: 100%;
     transform: translateX(-50%);
     width: 30px;
+    cursor: grabbing !important;
 
     .divider-line {
         margin: auto;
@@ -69,16 +75,17 @@
 }
 
 .download-button {
+    position: fixed;
     padding: 8px 22px;
     font-size: 1.4rem;
     background-color: white;
-    position: fixed;
-    bottom: 1.2rem;
-    border-radius: 5px;
+    bottom: 5rem;
     border: none;
+    border-radius: 5px;
     box-shadow:  0px 0px 0.2rem 0px rgba(0, 0, 0, 0.7);
     left: 50%;
     transform: translateX(-50%);
+    cursor: pointer;
 
     &:hover{
         background-color: rgb(231, 239, 248);
@@ -88,4 +95,18 @@
         background-color: rgb(121, 153, 201);
         color: white;
     } 
+}
+
+
+.gamma-slider {
+    position: fixed;
+    top: 3rem;
+    width: 20rem;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background-color: white;
+    border-radius: 11px;
+    padding: 10px 30px;
+    box-shadow:  0px 0px 0.2rem 0px rgba(0, 0, 0, 0.7);
 }

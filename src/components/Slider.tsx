@@ -13,7 +13,7 @@ export const Slider: React.FC<IProps> = ({ value, label, update, range: [min, ma
 
   return (
     <div className="slider">
-      {label && <label htmlFor={id}>{label}</label>}
+      {label && <label htmlFor={id}>{`${label}: ${value}`}</label>}
       <input
         id={id}
         type="range"

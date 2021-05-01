@@ -1,15 +1,58 @@
-import React from 'react';
-import { WebGlTextureDefault } from './WebGLTexture';
+import React, { useState, useEffect, useMemo } from 'react';
+import { WebGlTexture } from './WebGLTexture';
 import { BeforeAfterImageWithSlider } from './BeforeAfterImageWithSlider';
-import { WebGLRenderer, Scene, PerspectiveCamera } from 'three';
+import { WebGLRenderer, Scene, PerspectiveCamera, Texture, TextureLoader } from 'three';
+import { Slider } from './Slider';
+
+const renderer = new WebGLRenderer();
+// add scene
+const scene = new Scene();
+const camera = new PerspectiveCamera(75, 1, 0.1, 1000);
+
+const vertexShader = `
+varying vec2 _uv;
+
+void main() {
+  _uv = uv; 
+
+  gl_Position = vec4(position, 1.0); 
+}
+`;
+
+const fragmentShader = `
+uniform float gamma;
+uniform sampler2D imageTexture;
+
+varying vec2 _uv;
+
+void main () {
+  vec4 color = texture2D(imageTexture, _uv);
+
+  gl_FragColor = pow(color, vec4(gamma));
+}`;
+
+async function loadTexture() {
+  return new TextureLoader().loadAsync(
+    'https://images.unsplash.com/photo-1619665760845-d009188ef271?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=934&q=80'
+  );
+}
 
 export const Main: React.FC = () => {
   console.log('ImgProc 🖼️');
 
-  const renderer = new WebGLRenderer();
-  // add scene
-  const scene = new Scene();
-  const camera = new PerspectiveCamera(75, 1, 0.1, 1000);
+  const [texture, setTexture] = useState<Texture>();
+  const [gamma, setGamma] = useState(1);
+
+  useEffect(() => {
+    loadTexture().then(loadedTexture => setTexture(loadedTexture));
+  }, []);
+
+  const uniforms = useMemo(
+    () => ({
+      gamma: { value: gamma },
+    }),
+    [gamma]
+  );
 
   const saveResult = () => {
     renderer.render(scene, camera);
@@ -26,17 +69,33 @@ export const Main: React.FC = () => {
     setTimeout(() => document.body.removeChild(anchor));
   };
 
-  return (
+  console.log(gamma);
+
+  return texture ? (
     <div id="main">
       <BeforeAfterImageWithSlider
         before={
           <img src="https://images.unsplash.com/photo-1619665760845-d009188ef271?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=934&q=80" />
         }
-        after={<WebGlTextureDefault renderer={renderer} scene={scene} camera={camera} />}
+        after={
+          <WebGlTexture
+            renderer={renderer}
+            scene={scene}
+            camera={camera}
+            texture={texture}
+            uniforms={uniforms}
+            vertexShader={vertexShader}
+            fragmentShader={fragmentShader}
+          />
+        }
       />
+      <div className="gamma-slider">
+        <Slider value={gamma} update={setGamma} label="Gamma" range={[0, 3]} />
+      </div>
+
       <button className="download-button" onClick={saveResult}>
         Download
       </button>
     </div>
-  );
+  ) : null;
 };
