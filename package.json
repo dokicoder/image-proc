@@ -6,9 +6,9 @@
   "main": "index.js",
   "dependencies": {
     "@types/three": "^0.127.1",
+    "@types/uuid": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^3.6.1",
     "@typescript-eslint/parser": "^3.6.1",
-    "@types/uuid": "^8.3.0",
     "eslint": "^7.22.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-hooks": "^4.2.0",
@@ -25,7 +25,8 @@
     "slate-history": "^0.59.0",
     "slate-react": "^0.59.0",
     "three": "0.128.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "webpack-pwa-manifest": "^4.3.0"
   },
   "devDependencies": {
     "@types/react": "17.0.3",
@@ -49,6 +50,7 @@
   },
   "scripts": {
     "start": "node_modules/.bin/webpack serve --open --port 3000",
+    "build": "node_modules/.bin/webpack --env production",
     "lint": "eslint"
   },
   "author": "Kay Illner",

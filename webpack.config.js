@@ -3,6 +3,7 @@ const ESLintPlugin = require('eslint-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const { TsConfigPathsPlugin } = require('awesome-typescript-loader');
+const WebpackPwaManifest = require('webpack-pwa-manifest');
 
 module.exports = env => {
   return {
@@ -77,6 +78,20 @@ module.exports = env => {
       new CleanWebpackPlugin({ cleanAfterEveryBuildPatterns: ['dist'] }),
       new HtmlWebpackPlugin({
         template: './assets/template.html',
+      }),
+      new WebpackPwaManifest({
+        name: 'WebGL Shader Image Processing POC',
+        short_name: 'ImageProc',
+        description: 'My awesome Progressive Web App!',
+        background_color: '#fff',
+        display: 'standalone',
+        icons: [
+          {
+            src: path.resolve('src/assets/icon.svg'),
+            type: 'image/svg+xml',
+            sizes: [96, 128, 192, 256, 384, 512], // multiple sizes
+          },
+        ],
       }),
       new ESLintPlugin({
         extensions: ['.js', '.tsx', '.ts', '.tsx'],
