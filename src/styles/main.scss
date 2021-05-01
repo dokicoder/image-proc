@@ -71,6 +71,10 @@
         box-shadow:  0px 0px 0.2rem 0px rgba(0, 0, 0, 0.7);
         opacity: 0.4;
         transition: 0.3s ease-in-out opacity;
+
+        &:active {
+            opacity: 1;
+        }
     }
 }
 

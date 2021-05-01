@@ -5,12 +5,15 @@ interface IProps {
   after: React.ReactNode;
 }
 
-const Divider: React.FC<{ position: number; onDrag: React.DragEventHandler<HTMLDivElement> }> = ({
-  position,
-  onDrag,
-}) => {
+const Divider: React.FC<{ position: number; onDrag: any }> = ({ position, onDrag }) => {
   return (
-    <div className="divider" draggable={true} style={{ left: `${position * 100}%` }} onDrag={onDrag}>
+    <div
+      className="divider"
+      draggable={true}
+      style={{ left: `${position * 100}%` }}
+      onDrag={onDrag}
+      onTouchMove={onDrag}
+    >
       <div className="divider-line" />
       <div className="knob" />
     </div>
@@ -23,9 +26,15 @@ export const BeforeAfterImageWithSlider: React.FC<IProps> = ({ before, after }) 
   const imageContainerRef = useRef(null);
 
   const onDragKnob = (event: any) => {
+    let eventX = event.clientX;
+
+    if (event.touches?.length === 1) {
+      eventX = event.touches[0].clientX;
+    }
+
     const imageContainerRect = imageContainerRef.current.getBoundingClientRect();
     if (event.clientX !== 0) {
-      const dragPosition = Math.min(Math.max(event.clientX - imageContainerRect.x, 0) / imageContainerRect.width, 1);
+      const dragPosition = Math.min(Math.max(eventX - imageContainerRect.x, 0) / imageContainerRect.width, 1);
 
       setPosition(dragPosition);
     }
