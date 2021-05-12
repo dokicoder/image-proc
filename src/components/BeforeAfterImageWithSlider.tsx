@@ -43,12 +43,10 @@ export const BeforeAfterImageWithSlider: React.FC<IProps> = ({ before, after }) 
   return (
     <div className="image-container" ref={imageContainerRef}>
       {after}
-      <div className="image-before">
-        <div className="mask-container" style={{ maxWidth: `${position * 100}%` }}>
-          {before}
-        </div>
-        <Divider position={position} onDrag={onDragKnob} />
+      <div className="mask-container" style={{ maxWidth: `${position * 100}%` }}>
+        {before}
       </div>
+      <Divider position={position} onDrag={onDragKnob} />
     </div>
   );
 };

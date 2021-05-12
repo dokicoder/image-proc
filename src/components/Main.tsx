@@ -45,6 +45,19 @@ export const Main: React.FC = () => {
 
   useEffect(() => {
     loadTexture().then(loadedTexture => setTexture(loadedTexture));
+
+    /*
+    function touchstart(e: any) {
+      e.preventDefault();
+    }
+
+    function touchmove(e: any) {
+      e.preventDefault();
+    }
+
+    document.addEventListener('touchstart', touchstart, { passive: false, capture: false });
+    document.addEventListener('touchmove', touchmove, { passive: false, capture: false });
+    */
   }, []);
 
   const uniforms = useMemo(
@@ -72,10 +85,16 @@ export const Main: React.FC = () => {
   console.log(gamma);
 
   return texture ? (
-    <div id="main">
+    <>
       <BeforeAfterImageWithSlider
         before={
-          <img src="https://images.unsplash.com/photo-1619665760845-d009188ef271?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=934&q=80" />
+          <div
+            className="image-before"
+            style={{
+              backgroundImage:
+                'url("https://images.unsplash.com/photo-1619665760845-d009188ef271?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=934&q=80")',
+            }}
+          />
         }
         after={
           <WebGlTexture
@@ -96,6 +115,6 @@ export const Main: React.FC = () => {
       <button className="download-button" onClick={saveResult}>
         Download
       </button>
-    </div>
+    </>
   ) : null;
 };

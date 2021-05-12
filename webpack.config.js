@@ -93,9 +93,11 @@ module.exports = env => {
           },
         ],
       }),
+      /*
       new ESLintPlugin({
         extensions: ['.js', '.tsx', '.ts', '.tsx'],
       }),
+      */
     ],
     output: {
       filename: '[name].bundle.js',

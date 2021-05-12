@@ -92,7 +92,33 @@ export const WebGlTexture: React.FC<IProps> = ({
 
       materialRef.current.uniforms.imageTexture.value = texture;
 
-      renderer.setSize(texture.image.width, texture.image.height);
+      const { width: imageWidth, height: imageHeight } = texture.image;
+      const { clientWidth: viewportWidth, clientHeight: viewportHeight } = imageRef.current;
+
+      const imageAspect = imageWidth / imageHeight;
+      const viewportAspect = viewportWidth / viewportHeight;
+
+      console.log(imageAspect, viewportAspect);
+
+      if (imageRef.current) {
+        console.log('refAsp');
+      }
+
+      let renderWidth = 0;
+      let renderHeight = 0;
+      if (viewportAspect <= imageAspect) {
+        renderHeight = viewportHeight;
+        renderWidth = viewportHeight * imageAspect;
+      } else {
+        renderWidth = viewportWidth;
+        renderHeight = viewportWidth / imageAspect;
+      }
+
+      console.log('vP', viewportWidth, viewportHeight);
+      console.log('render', renderWidth, renderHeight);
+      console.log('asp', renderWidth / renderHeight);
+
+      renderer.setSize(renderWidth, renderHeight);
       renderScene();
     }
   }, [texture, renderer, renderScene]);
@@ -114,16 +140,6 @@ export const WebGlTexture: React.FC<IProps> = ({
 
     renderScene();
   }, [vertexShader, fragmentShader, uniforms]);
-
-  const aspect = useMemo(() => {
-    if (!texture.image) return 0;
-
-    const { width, height } = texture.image;
-
-    return width / height;
-  }, [texture]);
-
-  console.log({ aspect });
 
   return <div className="image-after" ref={imageRef} />;
 };
