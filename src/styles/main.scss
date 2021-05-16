@@ -24,8 +24,10 @@
 
 .image-after {
     position: absolute;
-    transform: translateY(10%);
-    top: -50%;
+    display: flex;
+
+    align-items: center;
+    justify-content: space-around;
 }
 
 .mask-container {

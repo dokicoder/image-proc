@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import {
   Scene,
   WebGLRenderer,
@@ -81,6 +81,36 @@ export const WebGlTexture: React.FC<IProps> = ({
     };
   }, [renderer, uniforms]);
 
+  const resizeRenderer = useCallback(() => {
+    if (!imageRef.current) {
+      return;
+    }
+
+    const { width: imageWidth, height: imageHeight } = texture.image;
+    const { clientWidth: viewportWidth, clientHeight: viewportHeight } = imageRef.current;
+
+    const imageAspect = imageWidth / imageHeight;
+    const viewportAspect = viewportWidth / viewportHeight;
+
+    console.log(imageAspect, viewportAspect);
+
+    let renderWidth = 0;
+    let renderHeight = 0;
+    if (viewportAspect <= imageAspect) {
+      renderHeight = viewportHeight;
+      renderWidth = viewportHeight * imageAspect;
+    } else {
+      renderWidth = viewportWidth;
+      renderHeight = viewportWidth / imageAspect;
+    }
+
+    console.log('vP', viewportWidth, viewportHeight);
+    console.log('render', renderWidth, renderHeight);
+    console.log('asp', renderWidth / renderHeight);
+
+    renderer.setSize(renderWidth, renderHeight);
+  }, [imageRef.current, texture]);
+
   useEffect(() => {
     if (texture) {
       if (!materialRef.current.uniforms.imageTexture) {
@@ -90,35 +120,10 @@ export const WebGlTexture: React.FC<IProps> = ({
         } as any;
       }
 
+      // update texture reference in material
       materialRef.current.uniforms.imageTexture.value = texture;
 
-      const { width: imageWidth, height: imageHeight } = texture.image;
-      const { clientWidth: viewportWidth, clientHeight: viewportHeight } = imageRef.current;
-
-      const imageAspect = imageWidth / imageHeight;
-      const viewportAspect = viewportWidth / viewportHeight;
-
-      console.log(imageAspect, viewportAspect);
-
-      if (imageRef.current) {
-        console.log('refAsp');
-      }
-
-      let renderWidth = 0;
-      let renderHeight = 0;
-      if (viewportAspect <= imageAspect) {
-        renderHeight = viewportHeight;
-        renderWidth = viewportHeight * imageAspect;
-      } else {
-        renderWidth = viewportWidth;
-        renderHeight = viewportWidth / imageAspect;
-      }
-
-      console.log('vP', viewportWidth, viewportHeight);
-      console.log('render', renderWidth, renderHeight);
-      console.log('asp', renderWidth / renderHeight);
-
-      renderer.setSize(renderWidth, renderHeight);
+      resizeRenderer();
       renderScene();
     }
   }, [texture, renderer, renderScene]);
@@ -140,6 +145,18 @@ export const WebGlTexture: React.FC<IProps> = ({
 
     renderScene();
   }, [vertexShader, fragmentShader, uniforms]);
+
+  useEffect(() => {
+    function handleResize() {
+      resizeRenderer();
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   return <div className="image-after" ref={imageRef} />;
 };
