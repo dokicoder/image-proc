@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { WebGlTexture } from './WebGLTexture';
 import { BeforeAfterImageWithSlider } from './BeforeAfterImageWithSlider';
 import { WebGLRenderer, Scene, PerspectiveCamera, Texture, TextureLoader } from 'three';
@@ -45,20 +45,9 @@ export const Main: React.FC = () => {
 
   useEffect(() => {
     loadTexture().then(loadedTexture => setTexture(loadedTexture));
-
-    /*
-    function touchstart(e: any) {
-      e.preventDefault();
-    }
-
-    function touchmove(e: any) {
-      e.preventDefault();
-    }
-
-    document.addEventListener('touchstart', touchstart, { passive: false, capture: false });
-    document.addEventListener('touchmove', touchmove, { passive: false, capture: false });
-    */
   }, []);
+
+  const imageContainerRef = useRef(null);
 
   const uniforms = useMemo(
     () => ({
@@ -66,6 +55,8 @@ export const Main: React.FC = () => {
     }),
     [gamma]
   );
+
+  const [viewportDimensions, setViewportDimensions] = useState<{ width: number; height: number }>();
 
   const saveResult = () => {
     renderer.render(scene, camera);
@@ -82,11 +73,10 @@ export const Main: React.FC = () => {
     setTimeout(() => document.body.removeChild(anchor));
   };
 
-  console.log(gamma);
-
   return texture ? (
-    <>
+    <div className="image-container" ref={imageContainerRef} style={viewportDimensions}>
       <BeforeAfterImageWithSlider
+        ref={imageContainerRef}
         before={
           <div
             className="image-before"
@@ -105,6 +95,9 @@ export const Main: React.FC = () => {
             uniforms={uniforms}
             vertexShader={vertexShader}
             fragmentShader={fragmentShader}
+            onCalculateDimensions={(width, height) => {
+              setViewportDimensions({ width, height });
+            }}
           />
         }
       />
@@ -115,6 +108,6 @@ export const Main: React.FC = () => {
       <button className="download-button" onClick={saveResult}>
         Download
       </button>
-    </>
+    </div>
   ) : null;
 };

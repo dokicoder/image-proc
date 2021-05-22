@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, forwardRef } from 'react';
 
 interface IProps {
   before: React.ReactNode;
@@ -20,10 +20,8 @@ const Divider: React.FC<{ position: number; onDrag: any }> = ({ position, onDrag
   );
 };
 
-export const BeforeAfterImageWithSlider: React.FC<IProps> = ({ before, after }) => {
+export const BeforeAfterImageWithSlider = forwardRef<any, IProps>(({ before, after }: IProps, imageContainerRef) => {
   const [position, setPosition] = useState(0.5);
-
-  const imageContainerRef = useRef(null);
 
   const onDragKnob = (event: any) => {
     let eventX = event.clientX;
@@ -32,7 +30,7 @@ export const BeforeAfterImageWithSlider: React.FC<IProps> = ({ before, after }) 
       eventX = event.touches[0].clientX;
     }
 
-    const imageContainerRect = imageContainerRef.current.getBoundingClientRect();
+    const imageContainerRect = (imageContainerRef as any).current.getBoundingClientRect();
     if (event.clientX !== 0) {
       const dragPosition = Math.min(Math.max(eventX - imageContainerRect.x, 0) / imageContainerRect.width, 1);
 
@@ -41,12 +39,12 @@ export const BeforeAfterImageWithSlider: React.FC<IProps> = ({ before, after }) 
   };
 
   return (
-    <div className="image-container" ref={imageContainerRef}>
+    <>
       {after}
       <div className="mask-container" style={{ maxWidth: `${position * 100}%` }}>
         {before}
       </div>
       <Divider position={position} onDrag={onDragKnob} />
-    </div>
+    </>
   );
-};
+});

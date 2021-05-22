@@ -16,9 +16,9 @@
     "file-loader": "^6.0.0",
     "immer": "^7.0.8",
     "node-sass": "^4.14.1",
-    "react": "17.0.1",
+    "react": "17.0.2",
     "react-device-detect": "^1.17.0",
-    "react-dom": "17.0.1",
+    "react-dom": "17.0.2",
     "react-fade-in": "^2.0.1",
     "react-loader-spinner": "^4.0.0",
     "react-router-dom": "^5.2.0",
@@ -30,7 +30,7 @@
     "webpack-pwa-manifest": "^4.3.0"
   },
   "devDependencies": {
-    "@types/react": "17.0.3",
+    "@types/react": "17.0.6",
     "@types/react-dom": "17.0.2",
     "@types/react-router-dom": "^5.1.7",
     "awesome-typescript-loader": "^5.2.1",
@@ -40,14 +40,17 @@
     "html-webpack-plugin": "^5.3.0",
     "sass-loader": "^11.0.1",
     "style-loader": "^2.0.0",
-    "typescript": "^4.2.3",
+    "typescript": "4.2.4",
     "url-loader": "4.1.1",
     "webpack": "^5.27.0",
     "webpack-cli": "^4.5.0",
     "webpack-dev-server": "^3.11.2"
   },
   "resolutions": {
-    "node-forge": "^0.10.0"
+    "node-forge": "^0.10.0",
+    "typescript": "4.2.4",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
   },
   "scripts": {
     "start": "node_modules/.bin/webpack serve --open --port 3000",

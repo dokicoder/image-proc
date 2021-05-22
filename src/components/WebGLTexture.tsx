@@ -40,6 +40,7 @@ interface IProps {
   renderer: WebGLRenderer;
   scene: Scene;
   camera: Camera;
+  onCalculateDimensions: (width: number, height: number) => void;
 }
 
 export const WebGlTexture: React.FC<IProps> = ({
@@ -50,6 +51,7 @@ export const WebGlTexture: React.FC<IProps> = ({
   renderer,
   scene,
   camera,
+  onCalculateDimensions,
 }) => {
   const imageRef = useRef<HTMLDivElement>(null);
   const materialRef = useRef<ShaderMaterial>(null);
@@ -92,8 +94,6 @@ export const WebGlTexture: React.FC<IProps> = ({
     const imageAspect = imageWidth / imageHeight;
     const viewportAspect = viewportWidth / viewportHeight;
 
-    console.log(imageAspect, viewportAspect);
-
     let renderWidth = 0;
     let renderHeight = 0;
     if (viewportAspect <= imageAspect) {
@@ -104,11 +104,8 @@ export const WebGlTexture: React.FC<IProps> = ({
       renderHeight = viewportWidth / imageAspect;
     }
 
-    console.log('vP', viewportWidth, viewportHeight);
-    console.log('render', renderWidth, renderHeight);
-    console.log('asp', renderWidth / renderHeight);
-
     renderer.setSize(renderWidth, renderHeight);
+    onCalculateDimensions(renderWidth, renderHeight);
   }, [imageRef.current, texture]);
 
   useEffect(() => {
