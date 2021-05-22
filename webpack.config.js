@@ -6,8 +6,10 @@ const { TsConfigPathsPlugin } = require('awesome-typescript-loader');
 const WebpackPwaManifest = require('webpack-pwa-manifest');
 
 module.exports = env => {
+  console.log(env.production ? 'production mode' : 'development mode');
+
   return {
-    mode: 'development',
+    mode: env.production ? 'production' : 'development',
     name: 'ImgProc',
     context: path.resolve(__dirname, 'src'),
     target: 'web',
@@ -67,12 +69,12 @@ module.exports = env => {
         }),
       ],
     },
-    devtool: env === 'production' ? false : 'cheap-module-source-map',
+    devtool: env.production ? false : 'cheap-module-source-map',
     devServer: {
       historyApiFallback: true,
     },
     optimization: {
-      minimize: env === 'production',
+      minimize: env.production,
     },
     plugins: [
       new CleanWebpackPlugin({ cleanAfterEveryBuildPatterns: ['dist'] }),

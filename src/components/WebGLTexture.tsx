@@ -57,7 +57,7 @@ export const WebGlTexture: React.FC<IProps> = ({
   const materialRef = useRef<ShaderMaterial>(null);
 
   const renderScene = useCallback(() => {
-    console.log('rerender WebGL');
+    // console.log('rerender WebGL');
 
     renderer.render(scene, camera);
   }, [renderer, scene, camera]);

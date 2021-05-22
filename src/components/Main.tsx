@@ -38,8 +38,6 @@ async function loadTexture() {
 }
 
 export const Main: React.FC = () => {
-  console.log('ImgProc 🖼️');
-
   const [texture, setTexture] = useState<Texture>();
   const [gamma, setGamma] = useState(1);
 
